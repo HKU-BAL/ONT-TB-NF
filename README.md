@@ -1,11 +1,12 @@
 # ONT-TB-NF
-A Nextflow pipeline for Mycobacterium tuberculosis (TB) antibiotic resistance gene Analysis with ONT data.
+A Nextflow pipeline for *Mycobacterium tuberculosis* (TB) antibiotic resistance gene Analysis with ONT data.
 
 
 ## Pipeline Description
 
 
-Comprehensive pipeline for detection of TB from ONT adaptive sequencing and amplicon data. Pipeline including quality control, alignment, variant calling, consensus generation and antimicrobial resistance prediction. 
+Comprehensive pipeline for detection of TB from ONT adaptive sequencing and amplicon data. 
+Pipeline including quality control, alignment, variant calling, consensus generation and antimicrobial resistance prediction. 
 
 ## Quickstart 
 
@@ -37,7 +38,14 @@ SAMPLE_ID={NAME}
 THREADS={THREAD}                  # threads number, e.g. 16
 OUT_DIR={ABSOLUTE OUTPUT PATH}    # output path, abolute path required
 
-nextflow run ${NF_S} --TB_script_dir=${NF_S_DIR} --ref ${REF} --read_fq ${FQ} --sample_name ${SAMPLE_ID} --gene_bed ${GENE_BED} --threads ${THREADS} --output_dir ${OUT_DIR}
+nextflow run ${NF_S} \
+--TB_script_dir=${NF_S_DIR} \
+--ref ${REF} \
+--read_fq ${FQ} \
+--sample_name ${SAMPLE_ID} \
+--gene_bed ${GENE_BED} \
+--threads ${THREADS} \
+--output_dir ${OUT_DIR}
 
 ```
 
@@ -56,7 +64,14 @@ SAMPLE_ID={NAME}
 THREADS={THREAD}                  # threads number, e.g. 16
 OUT_DIR={ABSOLUTE OUTPUT PATH}    # output path, abolute path required
 
-nextflow run ${NF_S} --TB_script_dir=${NF_S_DIR} --ref ${REF} --read_fq ${FQ} --sample_name ${SAMPLE_ID} --amplicon_bed ${GENE_BED} --threads ${THREADS} --output_dir ${OUT_DIR}
+nextflow run ${NF_S} \
+--TB_script_dir=${NF_S_DIR} \
+--ref ${REF} \
+--read_fq ${FQ} \
+--sample_name ${SAMPLE_ID} \
+--amplicon_bed ${GENE_BED} \
+--threads ${THREADS} \
+--output_dir ${OUT_DIR}
 
 ```
 

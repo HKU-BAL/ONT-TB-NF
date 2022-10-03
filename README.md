@@ -10,11 +10,11 @@ Pipeline including quality control, alignment, variant calling, consensus genera
 
 ## Quickstart 
 
-Install Nextflow by using the following command: 
+Install [Nextflow](https://www.nextflow.io/) by using the following command: 
 
     curl -s https://get.nextflow.io | bash 
     
-Install required packages and activate envirment with conda:
+Install required packages and activate envirment with [conda](https://conda.io/projects/conda/en/latest/index.html):
     
     conda create -n ont_tb samtools=1.15.1 minimap2=2.24 nanoplot=1.40.2 mosdepth=0.3.3 flye=2.9.1 -c bioconda
     conda activate ont_tb

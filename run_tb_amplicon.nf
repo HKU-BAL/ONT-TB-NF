@@ -203,7 +203,7 @@ workflow.onComplete {
     print "Variant calling results at:   ${params.output_dir}/3_vc"
     print "Consensus calling results at: ${params.output_dir}/4_cns"
     print "TB analysis report at:        ${params.output_dir}/5_rgi"
-    print "TB's json report can be updated to [https://card.mcmaster.ca/analyze/externalrgi] for visulization"
+    print "TB's json report can be uploaded to [https://card.mcmaster.ca/analyze/externalrgi] for visulization"
 
     print """
 ================================

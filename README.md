@@ -63,19 +63,16 @@ nextflow run ${NF_S} --TB_script_dir=${NF_S_DIR} --ref ${REF} --read_fq ${FQ} --
 
 ## Pipeline results
 
-For each sample the pipeline creates a folder named `sampleID` inside the directory specified by using the `--results` command line option (default: `results`).
-Here is a brief description of output files created for each sample:
 
+Here is a brief description of output files created for each sample:
+```
 QC results at:                {YOUR OUTPUR DIR}/1_qc
 Aligment results at:          {YOUR OUTPUR DIR}/2_aln
 Variant calling results at:   {YOUR OUTPUR DIR}/3_vc
 Consensus calling results at: {YOUR OUTPUR DIR}/4_cns
 TB analysis report at:        {YOUR OUTPUR DIR}/5_rgi
 TB's json report can be updated to [https://card.mcmaster.ca/analyze/externalrgi] for visulization
-
-
-
-![Image](../master/figures/workflow.png?raw=true)
+```
 
 ## Requirements 
 

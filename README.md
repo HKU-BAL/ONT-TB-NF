@@ -1,5 +1,5 @@
 # ONT-TB-NF
-A Nextflow pipeline for *Mycobacterium tuberculosis* (TB) antibiotic resistance gene Analysis with ONT data.
+A Nextflow pipeline for *Mycobacterium tuberculosis* (TB) antibiotic resistance gene analysis with ONT data.
 
 
 ## Pipeline Description

@@ -23,7 +23,7 @@ Install required packages and activate envirment with conda:
 Launch the pipeline execution with the following command: 
 
 
-### for adaptive sequencing
+### For adaptive sequencing
 
 ```
 TB_NF_DIR={ONT-TB-NF PATH}
@@ -49,7 +49,7 @@ nextflow run ${NF_S} \
 
 ```
 
-### for amplicon sequencing
+### For amplicon sequencing
 
 ```
 TB_NF_DIR={ONT-TB-NF PATH}

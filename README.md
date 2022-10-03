@@ -86,7 +86,7 @@ Aligment results at:          {YOUR OUTPUR DIR}/2_aln
 Variant calling results at:   {YOUR OUTPUR DIR}/3_vc
 Consensus calling results at: {YOUR OUTPUR DIR}/4_cns
 TB analysis report at:        {YOUR OUTPUR DIR}/5_rgi
-TB's json report can be updated to [https://card.mcmaster.ca/analyze/externalrgi] for visulization
+TB's json report can be uploaded to [https://card.mcmaster.ca/analyze/externalrgi] for visulization
 ```
 
 ## Requirements 

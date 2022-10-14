@@ -77,7 +77,7 @@ In general, the ONT-TB-NF pipeline performs the following tasks:
 - Filtering and Trimming of read ([NanoFilt](https://github.com/wdecoster/nanofilt))
 - Alignment ([minimap2](https://github.com/lh3/minimap2))
 - Variant calling ([Clair3](https://github.com/HKU-BAL/Clair3))
-- Antibiotic resistome prection ([TBProfiler](https://github.com/jodyphelan/TBProfiler))
+- Antibiotic resistome finding ([TBProfiler](https://github.com/jodyphelan/TBProfiler))
 
 
 

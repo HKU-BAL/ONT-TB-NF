@@ -80,8 +80,6 @@ In general, the ONT-TB-NF pipeline performs the following tasks:
 - Antibiotic resistome prection ([TBProfiler](https://github.com/jodyphelan/TBProfiler))
 
 
---nanofilt_options "STR"    Define the NanoFilt option for sequnencing filterinf and trimming, e.g. "-q 7" for filtering average quality low than 7.
---
 
 ## Pipeline results
 

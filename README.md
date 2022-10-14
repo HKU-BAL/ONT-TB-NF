@@ -18,10 +18,17 @@ Install required packages and activate envirment with [conda](https://conda.io/p
     
     conda create -n ont_tb samtools=1.15.1 minimap2=2.24 nanoplot=1.40.2 mosdepth=0.3.3 flye=2.9.1 nanofilt fastqc bedtools -c bioconda
     conda activate ont_tb
+    # clone ONT-TB-NF
+    git clone https://github.com/HKU-BAL/ONT-TB-NF.git
+    cd ONT-TB-NF
 
 
 Launch the pipeline execution with the following command: 
 
+```
+nextflow run_tb.nf --help
+nextflow run_tb_amplicon.nf --help
+```
 
 ### For adaptive sequencing
 

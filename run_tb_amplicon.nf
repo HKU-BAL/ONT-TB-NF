@@ -2,42 +2,83 @@
 nextflow.enable.dsl=2
 
 
-params.ref="$baseDir/data/ref.fa"
-params.read_fq="$baseDir/data/read.fq"
-params.sample_name="TB_1"
-params.amplicon_bed="$baseDir/data/amplicon.bed"
-params.TB_script_dir="/autofs/bal31/jhsu/home/data/TB/scripts"
-params.C3_model_n="r941_prom_sup_g5014"
-
+params.sample_name="TB"
+params.read_fq="$launchDir/read.fq"
 params.threads="32"
+params.output_dir="$launchDir/out"
 
-params.output_dir="$baseDir/out"
+params.ref="$baseDir/data/Mycobacterium_tuberculosis_H37Rv_genome_v3.fasta"
+params.ref_index="${params.ref}.fai"
+params.amplicon_bed="$baseDir/data/amplicon.bed"
+params.nanofilt_options=""
+
+params.TB_script_dir="$baseDir/scripts"
+params.C3_model_n="r941_prom_sup_g5014"
+params.alignment_work_space="20G"
+
+params.help = false
+
+if( params.help ) {
+
+log.info """
+
+A Nextflow pipeline for Mycobacterium tuberculosis (TB) antibiotic resistance gene analysis with ONT data.
+
+=============================================
+Usage:
+    nextflow run run_tb_amplicon.nf --sample_name [SAMPLE_NAME] --read_fq [READ FQ] --amplicon_bed [Amplicon bed] --threads [THREADS] --output_dir [OUTPUT DIR] 
+Input:
+    * --sample_name: sample name. Default [${params.sample_name}]
+    * --amplicon_bed: amplicon regions in bed file. Default [${params.amplicon_bed}]
+    * --read_fq: Path of read FQ file. Default [read.fq]
+    * --threads: number of threads for running. Default [${params.threads}]
+    * --output_dir: name of output directory. Default [out]
+    * --nanofilt_options: read filtering option. Default [None]
+
+more information are available at [Gtihub page](https://github.com/HKU-BAL/ONT-TB-NF)
+"""
+    exit 0
+}
 
 log.info """\
 
 Analysis TB data
 ================================
-sample name  : $params.sample_name
-input FQ     : $params.read_fq
-reference    : $params.ref
-amplicon bed : $params.amplicon_bed
-output       : $params.output_dir
-threads      : $params.threads
-Clair3 model : $params.C3_model_n
+sample name        : $params.sample_name
+input FQ           : $params.read_fq
+amplicon bed       : $params.amplicon_bed
+threads            : $params.threads
+output             : $params.output_dir
+reference          : $params.ref
+Clair3 model       : $params.C3_model_n
+QC NanoFilt option : [$params.nanofilt_options]
 
 """
 
 process run_QC {
+    debug true
 	publishDir "$params.output_dir/1_qc", mode: 'copy'
 
     input:
     path read_fq
 
     output:
-    path "$params.sample_name"
+    path "out.fq"
+    path "*.html"
 
     """
-    NanoPlot -o $params.sample_name -p $params.sample_name --fastq $read_fq -t $params.threads --raw
+    # run fastQC, check read base quality, read quality, GC content, etc.
+    fastqc -f fastq -o . -t ${params.threads} ${read_fq}
+
+    # using nanofilt to filter
+    # e.g. --nanfil_options "-q 7 " to filter read with mean quailty < 7
+    if [[ "${params.nanofilt_options}" != "" ]]; then
+        echo " run nanofilt_options"
+        NanoFilt ${params.nanofilt_options} ${read_fq} > out.fq
+	else
+        ln -s ${read_fq} out.fq
+    fi
+
     """
 }
 
@@ -53,7 +94,7 @@ process run_aln {
     path "${params.sample_name}_ori.bam.bai"
 
     """
-	minimap2 -ax map-ont -t $params.threads -I 1000G $ref $read_fq | samtools sort  -@ $params.threads | samtools view -F 2048 -b > ${params.sample_name}_ori.bam
+	minimap2 -ax map-ont -t $params.threads -I params.alignment_work_space $ref $read_fq | samtools sort  -@ $params.threads | samtools view -F 2048 -b > ${params.sample_name}_ori.bam
 	samtools index ${params.sample_name}_ori.bam
     """
 }
@@ -91,68 +132,68 @@ process run_check_gene_coverage {
 	"""
 	mosdepth -F 3844 -t $params.threads -b ${params.amplicon_bed} "${params.sample_name}" "${params.sample_name}.bam"
 	samtools flagstat "${params.sample_name}.bam" > mapping.stats
-	head -n 2 mapping.stats
+    echo "number of TB read found:"
+	head -n 1 mapping.stats
+    zcat ${params.sample_name}.regions.bed.gz | awk '{ sum += \$4; n++ } END { if (n > 0) print "average gene coverage at amplicon regions: " sum / n; }'
 	#echo 'contig\t start\t end\t name\t coverage'
 	#zcat ${params.sample_name}.regions.bed.gz
 	"""
 }
 
+
+
 process run_variant_calling {
-	debug true
-	publishDir "$params.output_dir/3_vc"
+    containerOptions "--cpus=${params.threads}"
+	publishDir "$params.output_dir/3_vc", mode: 'copy'
 
 	input:
+    path "ref.fa"
+    path "ref.fa.fai"
+    path "tar.bed"
     path "${params.sample_name}.bam"
     path "${params.sample_name}.bam.bai"
 
-    output:
-    val 0
+	output:
+    path "clair3_out/merge_output.vcf.gz"
+    path "clair3_out/merge_output.vcf.gz.tbi"
+    path "clair3_out"
 	
 
 	"""
-docker run \
---mount type=bind,source=${params.ref},target=/ref.fa \
---mount type=bind,source=${params.ref}.fai,target=/ref.fa.fai \
---mount type=bind,source=${params.amplicon_bed},target=/tar.bed \
---mount type=bind,source=$params.output_dir/2_aln/${params.sample_name}.bam,target=/input.bam \
---mount type=bind,source=$params.output_dir/2_aln/${params.sample_name}.bam.bai,target=/input.bam.bai \
--v ${params.output_dir}/3_vc:/out \
-hkubal/clair3:v0.1-r12 /opt/bin/run_clair3.sh \
---bam=/input.bam \
---ref_fn=/ref.fa \
---bed_fn=/tar.bed \
---threads=${params.threads} \
---chunk_size=100000 \
---platform="ont" \
---sample_name="${params.sample_name}" \
---model_path="/opt/models/${params.C3_model_n}" \
---output=/out \
---include_all_ctgs \
---no_phasing_for_fa \
---haploid_precise 
+	/opt/bin/run_clair3.sh \
+	--bam=${params.sample_name}.bam \
+	--ref_fn=ref.fa \
+    --bed_fn=tar.bed \
+	--threads=${params.threads} \
+	--chunk_size=100000 \
+	--platform="ont" \
+	--sample_name=${params.sample_name} \
+	--model_path="/opt/models/${params.C3_model_n}" \
+	--output=clair3_out \
+	--include_all_ctgs \
+	--no_phasing_for_fa \
+	--haploid_precise > log
+    tabix -p vcf clair3_out/merge_output.vcf.gz
+
 
 
 	"""
 }
 
 process run_get_consensus {
-	debug true
 	publishDir "$params.output_dir/4_cns", mode: 'copy'
 	
     input:
-    val x
+	path "input.vcf.gz" 
+	path "input.vcf.gz.tbi" 
 
 	output:
-	path "tar.vcf.gz" 
-	path "tar.vcf.gz.tbi" 
 	path "amplicon.region"
 	path "target.fa"
 
 	"""
 
-    cp ${params.output_dir}/3_vc/merge_output.vcf.gz ori.vcf.gz
-    tabix ori.vcf.gz
-    bcftools view -f 'PASS,.' ori.vcf.gz > tmp.vcf
+    bcftools view -f 'PASS,.' input.vcf.gz > tmp.vcf
     bedtools intersect -a tmp.vcf -b ${params.amplicon_bed} -header > tmp1.vcf
     bcftools view tmp1.vcf -O z -o tar.vcf.gz
     tabix tar.vcf.gz
@@ -164,46 +205,53 @@ process run_get_consensus {
 	"""
 }
 
+process run_tb_profiler {
+    containerOptions "--cpus=${params.threads}"
+	publishDir "$params.output_dir/5_tb", mode: 'copy'
 
-process run_rgi {
-	debug true
-	publishDir "$params.output_dir/5_rgi"
+	input:
+    path "input_fa"
+
+	output:
+    path "results"
 	
-    input:
-    path "target.fa"
-
+	"""
+	tb-profiler profile \
+	--fasta input_fa \
+	--platform nanopore \
+	--csv \
+	--pdf \
+	--threads ${params.threads} \
+	--prefix ${params.sample_name} > log
 
 	"""
-docker run \
---mount type=bind,source=${params.output_dir}/4_cns/target.fa,target=/input.fa \
--v ${params.output_dir}/5_rgi:/out \
-finlaymaguire/rgi:latest \
-rgi main -i /input.fa -o /out/rgi -t contig -n ${params.threads} --clean --low_quality
-    wc -l ${params.output_dir}/5_rgi/rgi.txt
-
-	"""
+    
 }
 
 workflow {
-    run_QC(params.read_fq)
-    run_aln(params.ref, params.read_fq)
+    (read_fq, _) = run_QC(params.read_fq)
+    run_aln(params.ref, read_fq)
     run_aln_filtering(run_aln.out)
     (_, _, _, o) = run_check_gene_coverage(run_aln_filtering.out)
 	o.view{"$it"}
-    run_variant_calling(run_aln_filtering.out)
-	(_, _, _, cns_f) = run_get_consensus(run_variant_calling.out)
-	run_rgi(cns_f)
+    (vcf, vcf_index, _) = run_variant_calling(params.ref, params.ref_index, params.amplicon_bed, run_aln_filtering.out)
+	(region_f, tar_fa) = run_get_consensus(vcf, vcf_index)
+	run_tb_profiler(tar_fa)
 }
 
 workflow.onComplete {
     print "================================"
     print "Finish TB analysis pipeline"
-    print "QC results at:                ${params.output_dir}/1_qc"
-    print "Aligment results at:          ${params.output_dir}/2_aln"
-    print "Variant calling results at:   ${params.output_dir}/3_vc"
-    print "Consensus calling results at: ${params.output_dir}/4_cns"
-    print "TB analysis report at:        ${params.output_dir}/5_rgi"
-    print "TB's json report can be uploaded to [https://card.mcmaster.ca/analyze/externalrgi] for visulization"
+    print "[1] QC results at:                                        ${params.output_dir}/1_qc"
+    print "[2] Aligment results at:                                  ${params.output_dir}/2_aln"
+    print "    | TB aligned bam at:                                  ${params.output_dir}/2_aln/${params.sample_name}.bam"
+    print "    | Alignment results statistics at:                    ${params.output_dir}/2_aln/mapping.stats"
+    print "    | AMR genes coverages at:                             ${params.output_dir}/2_aln/${params.sample_name}.regions.bed.gz"
+    print "[3] Variant calling results at:                           ${params.output_dir}/3_vc"
+    print "    | variant calling result at:                          ${params.output_dir}/3_vc/clair3_out/merge_output.vcf.gz"
+    print "[4] consensus at:                                         ${params.output_dir}/4_cns"
+    print "[5] TB analysis report at:                                ${params.output_dir}/5_tb"
+    print "    | TB pdf report at:                                   ${params.output_dir}/5_tb/results/${params.sample_name}.results.pdf"
 
     print """
 ================================

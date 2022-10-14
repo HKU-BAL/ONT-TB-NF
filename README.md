@@ -68,6 +68,7 @@ nextflow run ${NF_S} \
 ## Pipeline Summary
 
 The ONT-TB-NF pipeline is dedecated for decting TB from ONT data. The data can be obtained from standard whole genome sequncing from MinION, from adaptive sequcing, or from amplicon sequcing (by amplify sepecifig regions in TB genome). 
+
 For apply to WGS and adaptive sequcing (like from readfish or UNCALLED), please use the default `run_tb.nf` pipeline. 
 For apply to amplicon sequecing, please use the `run_tb_amplicon.nf' pipeline. 
 In general, the ONT-TB-NF pipeline performs the following tasks:

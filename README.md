@@ -34,7 +34,6 @@ nextflow run_tb_amplicon.nf --help
 
 ```
 TB_NF_DIR={ONT-TB-NF PATH}
-
 NF_S=${TB_NF_DIR}/run_tb.nf
 
 SAMPLE_ID={NAME}
@@ -54,7 +53,6 @@ nextflow run ${NF_S} \
 
 ```
 TB_NF_DIR={ONT-TB-NF PATH}
-
 NF_S=${TB_NF_DIR}/run_tb_amplicon.nf
 
 AMPLICON_BED={AMPLICON BED}       # your amplicon region 

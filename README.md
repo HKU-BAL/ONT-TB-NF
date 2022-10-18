@@ -1,11 +1,6 @@
 # ONT-TB-NF
-A Nextflow pipeline for *Mycobacterium tuberculosis* (TB) antibiotic resistance gene analysis with ONT data.
 
-
-## Pipeline Description
-
-
-Comprehensive pipeline for detection of TB from ONT adaptive sequencing and amplicon data. 
+Comprehensive pipeline for detection of *Mycobacterium tuberculosis* (TB) antibiotic resistance gene from ONT adaptive sequencing and amplicon data. 
 Pipeline including quality control, alignment, variant calling, consensus generation and antimicrobial resistance prediction. 
 
 ## Features

@@ -104,6 +104,7 @@ For apply to Amplicon sequecing, please use the `run_tb_amplicon.nf` pipeline.
 
 In general, the ONT-TB-NF pipeline performs the following tasks:
 
+- Basecalling (Guppy, guppy_basecaller)
 - Sequncing quality control ([FastQC](https://www.bioinformatics.babraham.ac.uk/projects/fastqc/))
 - Filtering and Trimming of read ([NanoFilt](https://github.com/wdecoster/nanofilt))
 - Alignment ([minimap2](https://github.com/lh3/minimap2))

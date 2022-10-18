@@ -18,7 +18,9 @@ Install [Nextflow](https://www.nextflow.io/) by using the following command:
     curl -s https://get.nextflow.io | bash 
     
 Install required packages and activate envirment with [conda](https://conda.io/projects/conda/en/latest/index.html):
-    
+
+    docker pull hkubal/clair3:v0.1-r12
+    docker pull quay.io/biocontainers/tb-profiler:4.3.0--pypyh5e36f6f_0
     conda create -n ont_tb samtools=1.15.1 minimap2=2.24 nanoplot=1.40.2 mosdepth=0.3.3 flye=2.9.1 nanofilt fastqc bedtools -c bioconda
     conda activate ont_tb
     # clone ONT-TB-NF

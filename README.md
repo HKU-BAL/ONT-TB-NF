@@ -1,6 +1,7 @@
 # ONT-TB-NF
 
 Comprehensive pipeline for detection of *Mycobacterium tuberculosis* (TB) antibiotic resistance gene from ONT adaptive sequencing and amplicon data. 
+
 Pipeline including quality control, alignment, variant calling, consensus generation and antimicrobial resistance prediction. 
 
 ## Features

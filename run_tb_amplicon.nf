@@ -16,6 +16,11 @@ params.TB_script_dir="$baseDir/scripts"
 params.C3_model_n="r941_prom_sup_g5014"
 params.alignment_work_space="20G"
 
+params.fast5_dir=""
+params.guppy_basecaller_path=""
+params.guppy_config_path=""
+params.guppy_options=""
+params.help = false
 params.help = false
 
 if( params.help ) {
@@ -26,14 +31,19 @@ A Nextflow pipeline for Mycobacterium tuberculosis (TB) antibiotic resistance ge
 
 =============================================
 Usage:
-    nextflow run run_tb_amplicon.nf --sample_name [SAMPLE_NAME] --read_fq [READ FQ] --amplicon_bed [Amplicon bed] --threads [THREADS] --output_dir [OUTPUT DIR] 
+    nextflow run run_tb_amplicon.nf --sample_name [SAMPLE_NAME] (--fast5 [FAST5_DIR] | --read_fq [READ FQ]) --amplicon_bed [Amplicon bed] --threads [THREADS] --output_dir [OUTPUT DIR] 
 Input:
-    * --sample_name: sample name. Default [${params.sample_name}]
-    * --amplicon_bed: amplicon regions in bed file. Default [${params.amplicon_bed}]
-    * --read_fq: Path of read FQ file. Default [read.fq]
-    * --threads: number of threads for running. Default [${params.threads}]
-    * --output_dir: name of output directory. Default [out]
-    * --nanofilt_options: read filtering option. Default [None]
+     --sample_name: sample name. Default [${params.sample_name}]
+     --amplicon_bed: amplicon regions in bed file. Default [${params.amplicon_bed}]
+     --read_fq: Path of read FQ file, if set with the fast5_dir, this setting will be neglected. Default [read.fq]
+     --fast5_dir: Path of all fast5 for basecalling . Default [None]
+	   | * setting guppy setting for basecalling:
+	   |  --guppy_basecaller_path [Guppy basecaller path]
+	   |  --guppy_config_path  [Guppy config file, e.g. dna_r10.4_e8.1_sup.cfg]
+	   |  --guppy_options [Guppy other options e.g. "--devide 'cuda:0'"]
+     --threads: number of threads for running. Default [${params.threads}]
+     --output_dir: name of output directory. Default [out]
+     --nanofilt_options: read filtering option. Default [None]
 
 more information are available at [Gtihub page](https://github.com/HKU-BAL/ONT-TB-NF)
 """
@@ -54,6 +64,21 @@ Clair3 model       : $params.C3_model_n
 QC NanoFilt option : [$params.nanofilt_options]
 
 """
+
+process run_Basecalling {
+	debug true
+	publishDir "$params.output_dir/0_bc", mode: 'copy'
+
+    output:
+	path "input.fastq"
+    path "*"
+
+    """
+    #(time ${params.guppy_basecaller_path} -i ${params.fast5_dir} -s . -c ${params.guppy_config_path} $params.guppy_options) |& tee base_call.log
+    (time ${params.guppy_basecaller_path} -i ${params.fast5_dir} -s . -c ${params.guppy_config_path} $params.guppy_options) > base_call.log
+	cat ./pass/*.fastq > input.fastq
+    """
+}
 
 process run_QC {
     debug true
@@ -173,7 +198,7 @@ process run_variant_calling {
 	--include_all_ctgs \
 	--no_phasing_for_fa \
 	--haploid_precise > log
-    tabix -p vcf clair3_out/merge_output.vcf.gz
+    tabix -fp vcf clair3_out/merge_output.vcf.gz
 
 
 
@@ -229,7 +254,21 @@ process run_tb_profiler {
 }
 
 workflow {
-    (read_fq, _) = run_QC(params.read_fq)
+	if (params.fast5_dir != "") {
+		println "======"
+		println "running basecalling"
+		println "base calling at dir: $params.fast5_dir"
+		println "buppy basecaller path: $params.guppy_basecaller_path"
+		println "buppy config path: $params.guppy_config_path"
+		println "guppy_options: $params.guppy_options"
+		println "======"
+		println ""
+		(ori_fq, _) = run_Basecalling()
+        (read_fq, _) = run_QC(ori_fq)
+	}
+	else {
+    	(read_fq, _) = run_QC(params.read_fq)
+    }
     run_aln(params.ref, read_fq)
     run_aln_filtering(run_aln.out)
     (_, _, _, o) = run_check_gene_coverage(run_aln_filtering.out)
@@ -242,6 +281,7 @@ workflow {
 workflow.onComplete {
     print "================================"
     print "Finish TB analysis pipeline"
+    print "[0] (optional) Basecalling results at:                    ${params.output_dir}/0_bc"
     print "[1] QC results at:                                        ${params.output_dir}/1_qc"
     print "[2] Aligment results at:                                  ${params.output_dir}/2_aln"
     print "    | TB aligned bam at:                                  ${params.output_dir}/2_aln/${params.sample_name}.bam"

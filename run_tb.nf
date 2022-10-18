@@ -16,6 +16,10 @@ params.TB_script_dir="$baseDir/scripts"
 params.C3_model_n="r941_prom_sup_g5014"
 params.alignment_work_space="20G"
 
+params.fast5_dir=""
+params.guppy_basecaller_path=""
+params.guppy_config_path=""
+params.guppy_options=""
 params.help = false
 
 if( params.help ) {
@@ -26,13 +30,18 @@ A Nextflow pipeline for Mycobacterium tuberculosis (TB) antibiotic resistance ge
 
 =============================================
 Usage:
-    nextflow run run_tb.nf --sample_name [SAMPLE_NAME] --read_fq [READ FQ] --threads [THREADS] --output_dir [OUTPUT DIR] 
+    nextflow run run_tb.nf --sample_name [SAMPLE_NAME] (--fast5 [FAST5_DIR] | --read_fq [READ FQ]) --threads [THREADS] --output_dir [OUTPUT DIR] 
 Input:
-    * --sample_name: sample name. Default [${params.sample_name}]
-    * --read_fq: Path of read FQ file. Default [read.fq]
-    * --threads: number of threads for running. Default [${params.threads}]
-    * --output_dir: name of output directory. Default [out]
-    * --nanofilt_options: read filtering option. Default [None]
+     --sample_name: sample name. Default [${params.sample_name}]
+     --read_fq: Path of read FQ file, if set with the fast5_dir, this setting will be neglected. Default [read.fq]
+     --fast5_dir: Path of all fast5 for basecalling . Default [None]
+	   | * setting guppy setting for basecalling:
+	   |  --guppy_basecaller_path [Guppy basecaller path]
+	   |  --guppy_config_path  [Guppy config file, e.g. dna_r10.4_e8.1_sup.cfg]
+	   |  --guppy_options [Guppy other options e.g. "--devide 'cuda:0'"]
+     --threads: number of threads for running. Default [${params.threads}]
+     --output_dir: name of output directory. Default [out]
+     --nanofilt_options: read filtering option. Default [None]
 
 more information are available at [Gtihub page](https://github.com/HKU-BAL/ONT-TB-NF)
 """
@@ -53,6 +62,21 @@ Clair3 model       : $params.C3_model_n
 QC NanoFilt option : [$params.nanofilt_options]
 
 """
+
+process run_Basecalling {
+	debug true
+	publishDir "$params.output_dir/0_bc", mode: 'copy'
+
+    output:
+	path "input.fastq"
+    path "*"
+
+    """
+    #(time ${params.guppy_basecaller_path} -i ${params.fast5_dir} -s . -c ${params.guppy_config_path} $params.guppy_options) |& tee base_call.log
+    (time ${params.guppy_basecaller_path} -i ${params.fast5_dir} -s . -c ${params.guppy_config_path} $params.guppy_options) > base_call.log
+	cat ./pass/*.fastq > input.fastq
+    """
+}
 
 process run_QC {
     debug true
@@ -116,6 +140,7 @@ process run_aln_filtering {
 }
 
 process run_check_gene_coverage {
+    debug true
 	publishDir "$params.output_dir/2_aln", mode: 'copy'
 	
     input:
@@ -123,10 +148,10 @@ process run_check_gene_coverage {
     path "${params.sample_name}.bam.bai"
 
 	output:
+    path read_cnt
 	path "*.summary.txt"
 	path "${params.sample_name}.regions.bed.gz"
 	path "mapping.stats"
-	stdout
 
 	"""
 	mosdepth -F 3844 -t $params.threads -b ${params.gene_bed} "${params.sample_name}" "${params.sample_name}.bam"
@@ -134,6 +159,8 @@ process run_check_gene_coverage {
     echo "number of TB read found:"
 	head -n 1 mapping.stats
     zcat ${params.sample_name}.regions.bed.gz | awk '{ sum += \$5; n++ } END { if (n > 0) print "average AMR gene coverage: " sum / n; }'
+    #head -n 1 mapping.stats | cut -d ' ' -f 1 > read_cnt
+    samtools view "${params.sample_name}.bam" | head -n 1 | wc -l > read_cnt
 	#echo 'contig\t start\t end\t name\t coverage'
 	#zcat ${params.sample_name}.regions.bed.gz
 	"""
@@ -187,6 +214,10 @@ process run_tb_profiler {
     path "results"
 	
 	"""
+
+    mkdir results
+    if [ `samtools view "${params.sample_name}.bam" | head -n1 | wc -l |  awk '{print \$1}'` -ge "1" ]
+    then 
 	tb-profiler profile \
 	--bam ${params.sample_name}.bam \
 	--platform nanopore \
@@ -194,6 +225,8 @@ process run_tb_profiler {
 	--pdf \
 	--threads ${params.threads} \
 	--prefix ${params.sample_name} > log
+    fi
+    
 
 	"""
     
@@ -231,19 +264,33 @@ process run_get_consensus {
 
 
 workflow {
-    (read_fq, _) = run_QC(params.read_fq)
+	if (params.fast5_dir != "") {
+		println "======"
+		println "running basecalling"
+		println "base calling at dir: $params.fast5_dir"
+		println "buppy basecaller path: $params.guppy_basecaller_path"
+		println "buppy config path: $params.guppy_config_path"
+		println "guppy_options: $params.guppy_options"
+		println "======"
+		println ""
+		(ori_fq, _) = run_Basecalling()
+        (read_fq, _) = run_QC(ori_fq)
+	}
+	else {
+    	(read_fq, _) = run_QC(params.read_fq)
+    }
     run_aln(params.ref, read_fq)
-    run_aln_filtering(run_aln.out)
-    (_, _, _, o) = run_check_gene_coverage(run_aln_filtering.out)
-	o.view{"$it"}
+    (tar_bam, tar_bam_idx) = run_aln_filtering(run_aln.out)
+    (o, _, _, _) = run_check_gene_coverage(run_aln_filtering.out)
+
     run_variant_calling(params.ref, params.ref_index, run_aln_filtering.out)
-	//(_, _, cns_f) = run_get_consensus(run_aln_filtering.out)
 	run_tb_profiler(run_aln_filtering.out)
 }
 
 workflow.onComplete {
     print "================================"
     print "Finish TB analysis pipeline"
+    print "[0] (optional) Basecalling results at:                    ${params.output_dir}/0_bc"
     print "[1] QC results at:                                        ${params.output_dir}/1_qc"
     print "[2] Aligment results at:                                  ${params.output_dir}/2_aln"
     print "    | TB aligned bam at:                                  ${params.output_dir}/2_aln/${params.sample_name}.bam"

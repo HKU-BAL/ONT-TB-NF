@@ -2,7 +2,7 @@
 
 The ONT-TB-NF pipeline is dedicated to detecting *[Mycobacterium tuberculosis](https://en.wikipedia.org/wiki/Mycobacterium_tuberculosis)* (TB) antibiotic-resistance genes from ONT sequencing data. 
 
-The input sequencing data can be obtained from the flowing following:
+The input sequencing data can be obtained from:
 - Standard whole genome sequencing (WGS) from MinION, 
 - Adaptive sequencing (like from [readfish](https://github.com/looselab/readfish) or [UNCALLED](https://github.com/skovaka/UNCALLED)), 
 - Amplicon sequencing (by amplifying specific regions in the TB genome).

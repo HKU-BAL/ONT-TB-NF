@@ -71,7 +71,7 @@ nextflow run ${NF_S} \
 
 Make sure you are in the `ont_tb` environment with the command of `conda activate ont_tb`.
 
-For Amplicon sequencing data, the pipeline needs to provide the amplicon bed regions from `--amplicon_bed` option.
+For Amplicon sequencing data, the pipeline needs to be provided with the amplicon bed regions from `--amplicon_bed` option.
 
 ```
 TB_NF_DIR={ONT-TB-NF PATH}

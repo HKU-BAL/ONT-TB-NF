@@ -1,8 +1,13 @@
 # ONT-TB-NF
 
-The ONT-TB-NF pipeline is dedicated to detecting *[Mycobacterium tuberculosis](https://en.wikipedia.org/wiki/Mycobacterium_tuberculosis)* (TB) antibiotic-resistance genes from ONT sequencing data. The ONT data can be obtained from standard whole genome sequencing (WGS) from MinION, from adaptive sequencing, or from amplicon sequencing (by amplifying specific regions in the TB genome).
+The ONT-TB-NF pipeline is dedicated to detecting *[Mycobacterium tuberculosis](https://en.wikipedia.org/wiki/Mycobacterium_tuberculosis)* (TB) antibiotic-resistance genes from ONT sequencing data. 
 
-Pipeline including basecalling, quality control, target regions alignment, variant calling, consensus generation, and antimicrobial resistance prediction.
+The input sequencing data can be obtained from the flowing following:
+- Standard whole genome sequencing (WGS) from MinION, 
+- Adaptive sequencing (like from [readfish](https://www.nature.com/articles/s41587-020-00746-x) or [UNCALLED](https://www.nature.com/articles/s41587-020-0731-9)), 
+- Amplicon sequencing (by amplifying specific regions in the TB genome).
+
+The ONT-TB-NF pipeline includes steps of basecalling, quality control, target regions alignment, variant calling, consensus generation, and antimicrobial resistance prediction.
 
 
 ## Features
@@ -103,7 +108,7 @@ nextflow run ${NF_S} --fast5_dir ${FAST5_DIR} --guppy_basecaller_path ${GUPPY_BA
 
 ## Pipeline Summary
 
-For apply at WGS and adaptive sequencing (like from [readfish](https://www.nature.com/articles/s41587-020-00746-x) or [UNCALLED](https://www.nature.com/articles/s41587-020-0731-9)), please use the default `run_tb.nf` pipeline. 
+For apply at WGS and adaptive sequencing, please use the default `run_tb.nf` pipeline. 
 
 For analysis of the Amplicon sequencing data, please use the `run_tb_amplicon.nf` pipeline. 
 

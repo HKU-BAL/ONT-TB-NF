@@ -1,5 +1,7 @@
 # ONT-TB-NF
 
+[![License](https://img.shields.io/badge/License-BSD%203--Clause-blue.svg)](https://opensource.org/licenses/BSD-3-Clause) 
+
 The ONT-TB-NF pipeline is dedicated to detecting *[Mycobacterium tuberculosis](https://en.wikipedia.org/wiki/Mycobacterium_tuberculosis)* (TB) antibiotic-resistance genes from ONT sequencing data. 
 
 The input sequencing data can be obtained from:

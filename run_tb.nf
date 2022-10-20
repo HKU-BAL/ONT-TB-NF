@@ -179,8 +179,6 @@ process run_variant_calling {
     path "${params.sample_name}.bam.bai"
 
 	output:
-    path "clair3_out/merge_output.vcf.gz"
-    path "clair3_out/merge_output.vcf.gz.tbi"
     path "clair3_out"
 	
 

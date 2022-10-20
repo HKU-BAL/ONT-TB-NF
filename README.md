@@ -123,6 +123,7 @@ In general, the ONT-TB-NF pipeline performs the following tasks:
 - Variant calling ([Clair3](https://github.com/HKU-BAL/Clair3))
 - Antibiotic resistome finding ([TBProfiler](https://github.com/jodyphelan/TBProfiler))
 
+![Image](./figures/wf.png)
 
 
 ## Pipeline results

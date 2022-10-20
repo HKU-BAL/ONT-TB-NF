@@ -2,7 +2,10 @@
 
 [![License](https://img.shields.io/badge/License-BSD%203--Clause-blue.svg)](https://opensource.org/licenses/BSD-3-Clause) 
 [![Nextflow](https://img.shields.io/badge/Build-Nextflow-brightgreen)](https://www.nextflow.io/index.html)
-[![Clair3](https://img.shields.io/badge/Vairant%20calling-Clair3-blue)](https://github.com/HKU-BAL/Clair3)
+[![Clair3](https://img.shields.io/badge/Variant%20calling-Clair3-blue)](https://github.com/HKU-BAL/Clair3)
+[![ONT](https://img.shields.io/badge/Support-ONT-005c75)](https://nanoporetech.com/)
+[![Adaptive](https://img.shields.io/badge/Support-Adaptive%20Seq-005c75)](https://nanoporetech.com/about-us/news/towards-real-time-targeting-enrichment-or-other-sampling-nanopore-sequencing-devices)
+
 
 
 The ONT-TB-NF pipeline is dedicated to detecting *[Mycobacterium tuberculosis](https://en.wikipedia.org/wiki/Mycobacterium_tuberculosis)* (TB) antibiotic-resistance genes from ONT sequencing data. 

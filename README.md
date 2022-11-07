@@ -125,6 +125,7 @@ In general, the ONT-TB-NF pipeline performs the following tasks:
 - Basecalling (Guppy, guppy_basecaller)
 - Sequencing quality control ([FastQC](https://www.bioinformatics.babraham.ac.uk/projects/fastqc/))
 - Filtering and Trimming of read ([NanoFilt](https://github.com/wdecoster/nanofilt))
+- Taxonomic classification ([MegaPath-Nano](https://github.com/HKU-BAL/MegaPath-Nano))
 - Alignment ([minimap2](https://github.com/lh3/minimap2))
 - Variant calling ([Clair3](https://github.com/HKU-BAL/Clair3))
 - Antibiotic resistome finding ([TBProfiler](https://github.com/jodyphelan/TBProfiler))
@@ -135,13 +136,14 @@ In general, the ONT-TB-NF pipeline performs the following tasks:
 ## Pipeline results
 
 
-Here is a brief description of output files created for each sample:
+Here is a brief description of output files created for each sample, optional module are labeled with [O]:
 ```
-Basecalling results at:       {YOUR OUTPUR DIR}/0_bc
-QC results at:                {YOUR OUTPUR DIR}/1_qc
-Aligment results at:          {YOUR OUTPUR DIR}/2_aln
-Variant calling results at:   {YOUR OUTPUR DIR}/3_vc
-TB analysis report at:        {YOUR OUTPUR DIR}/4_tb
+[O] Basecalling results at:       {YOUR OUTPUR DIR}/0_bc
+    QC results at:                {YOUR OUTPUR DIR}/1_qc
+    Aligment results at:          {YOUR OUTPUR DIR}/2_aln
+    Variant calling results at:   {YOUR OUTPUR DIR}/3_vc
+    TB analysis report at:        {YOUR OUTPUR DIR}/4_tb
+[O] taxonomic classification at:  {YOUR OUTPUR DIR}/5_mpn
 ```
 
 ## Requirements 

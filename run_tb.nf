@@ -21,6 +21,8 @@ params.guppy_basecaller_path=""
 params.guppy_config_path=""
 params.guppy_options=""
 params.help = false
+params.megapath_path=""
+params.megapath_nano_options=""
 
 if( params.help ) {
 
@@ -42,6 +44,8 @@ Input:
      --threads: number of threads for running. Default [${params.threads}]
      --output_dir: name of output directory. Default [out]
      --nanofilt_options: read filtering option. Default [None]
+     --megapath_path: MegaPath-Nano path [None]
+     --megapath_nano_options: MegaPath-Nano option. Default [None]
 
 more information are available at [Gtihub page](https://github.com/HKU-BAL/ONT-TB-NF)
 """
@@ -60,6 +64,8 @@ reference          : $params.ref
 gene bed           : $params.gene_bed
 Clair3 model       : $params.C3_model_n
 QC NanoFilt option : [$params.nanofilt_options]
+MegaPath path      : [$params.megapath_path]
+MegaPath option    : [$params.megapath_nano_options]
 
 """
 
@@ -231,7 +237,6 @@ process run_tb_profiler {
 }
 
 process run_get_consensus {
-	debug true
 	publishDir "$params.output_dir/4_cns", mode: 'copy'
 	
     input:
@@ -259,6 +264,21 @@ process run_get_consensus {
 	"""
 }
 
+process run_Megapath {
+	debug true
+	publishDir "$params.output_dir/5_mpn", mode: 'copy'
+	
+    input:
+    path read_fq
+
+	output:
+	path mpn
+
+	"""
+    python "${params.megapath_path}" --query read_fq --max_aligner_thread "${params.threads}" "${params.megapath_nano_options}" --output_folder mpn
+	"""
+}
+
 
 
 workflow {
@@ -279,10 +299,22 @@ workflow {
     }
     run_aln(params.ref, read_fq)
     (tar_bam, tar_bam_idx) = run_aln_filtering(run_aln.out)
+
     (o, _, _, _) = run_check_gene_coverage(run_aln_filtering.out)
 
     run_variant_calling(params.ref, params.ref_index, run_aln_filtering.out)
 	run_tb_profiler(run_aln_filtering.out)
+
+	if (params.megapath_path != "") {
+		println "======"
+		println "running MegaPath-Nano"
+		println "MegaPath path: $params.megapath_path"
+		println "MegaPath-Nano option: $params.megapath_nano_options"
+		println "======"
+		println ""
+		run_Megapath(read_fq)
+    }
+
 }
 
 workflow.onComplete {
@@ -298,6 +330,7 @@ workflow.onComplete {
     print "    | variant calling result at:                          ${params.output_dir}/3_vc/clair3_out/merge_output.vcf.gz"
     print "[4] TB analysis report at:                                ${params.output_dir}/4_tb"
     print "    | TB pdf report at:                                   ${params.output_dir}/4_tb/results/${params.sample_name}.results.pdf"
+    print "[5] (optional) Megapath-Nano report at:                   ${params.output_dir}/5_mpn"
 
     print """
 ================================

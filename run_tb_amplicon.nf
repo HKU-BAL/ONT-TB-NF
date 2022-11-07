@@ -21,7 +21,8 @@ params.guppy_basecaller_path=""
 params.guppy_config_path=""
 params.guppy_options=""
 params.help = false
-params.help = false
+params.megapath_path=""
+params.megapath_nano_options=""
 
 if( params.help ) {
 
@@ -44,6 +45,8 @@ Input:
      --threads: number of threads for running. Default [${params.threads}]
      --output_dir: name of output directory. Default [out]
      --nanofilt_options: read filtering option. Default [None]
+     --megapath_path: MegaPath-Nano path [None]
+     --megapath_nano_options: MegaPath-Nano option. Default [None]
 
 more information are available at [Gtihub page](https://github.com/HKU-BAL/ONT-TB-NF)
 """
@@ -62,6 +65,8 @@ output             : $params.output_dir
 reference          : $params.ref
 Clair3 model       : $params.C3_model_n
 QC NanoFilt option : [$params.nanofilt_options]
+MegaPath path      : [$params.megapath_path]
+MegaPath option    : [$params.megapath_nano_options]
 
 """
 
@@ -253,6 +258,21 @@ process run_tb_profiler {
     
 }
 
+process run_Megapath {
+	debug true
+	publishDir "$params.output_dir/5_mpn", mode: 'copy'
+	
+    input:
+    path read_fq
+
+	output:
+	path mpn
+
+	"""
+    python "${params.megapath_path}" --query read_fq --max_aligner_thread "${params.threads}" "${params.megapath_nano_options}" --output_folder mpn
+	"""
+}
+
 workflow {
 	if (params.fast5_dir != "") {
 		println "======"
@@ -276,6 +296,16 @@ workflow {
     (vcf, vcf_index, _) = run_variant_calling(params.ref, params.ref_index, params.amplicon_bed, run_aln_filtering.out)
 	(region_f, tar_fa) = run_get_consensus(vcf, vcf_index)
 	run_tb_profiler(tar_fa)
+
+	if (params.megapath_path != "") {
+		println "======"
+		println "running MegaPath-Nano"
+		println "MegaPath path: $params.megapath_path"
+		println "MegaPath-Nano option: $params.megapath_nano_options"
+		println "======"
+		println ""
+		run_Megapath(read_fq)
+    }
 }
 
 workflow.onComplete {
@@ -292,6 +322,7 @@ workflow.onComplete {
     print "[4] consensus at:                                         ${params.output_dir}/4_cns"
     print "[5] TB analysis report at:                                ${params.output_dir}/5_tb"
     print "    | TB pdf report at:                                   ${params.output_dir}/5_tb/results/${params.sample_name}.results.pdf"
+    print "[6] (optional) Megapath-Nano report at:                   ${params.output_dir}/6_mpn"
 
     print """
 ================================

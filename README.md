@@ -8,7 +8,7 @@
 
 
 
-The ONT-TB-NF pipeline is dedicated to detecting *[Mycobacterium tuberculosis](https://en.wikipedia.org/wiki/Mycobacterium_tuberculosis)* (TB) antibiotic-resistance genes from ONT sequencing data. 
+The ONT-TB-NF pipeline is built to detect *[Mycobacterium tuberculosis](https://en.wikipedia.org/wiki/Mycobacterium_tuberculosis)* (TB) antibiotic-resistance genes from ONT sequencing data. 
 
 The input sequencing data can be obtained from various settings of [ONT sequencing](https://nanoporetech.com/products), including
 - Adaptive sequencing (like from [readfish](https://github.com/looselab/readfish) or [UNCALLED](https://github.com/skovaka/UNCALLED)), 

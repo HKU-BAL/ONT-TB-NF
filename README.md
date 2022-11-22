@@ -26,7 +26,23 @@ The ONT-TB-NF pipeline includes steps of basecalling, quality control, target re
 
 
 
-## Quickstart 
+
+## Contents
+
+----
+* [Installation](#installation)
+* [Usage](#usage)
+  + [Adaptive sequencing](#for-adaptive-sequencing)
+  + [Amplicon sequencing](#for-amplicon-sequencing)
+  + [Basecalling with Guppy](#using-guppy-for-basecalling)
+* [Pipeline Summary](#pipeline-summary)
+* [Pipeline Ouputs](#pipeline-results)
+* [Requirements](#requirements)
+
+----
+
+
+## Installation 
 
 Install [Nextflow](https://www.nextflow.io/) by using the following command: 
 
@@ -43,6 +59,7 @@ Install required packages with [conda](https://conda.io/projects/conda/en/latest
     git clone https://github.com/HKU-BAL/ONT-TB-NF.git
     cd ONT-TB-NF
 
+## Usage 
 
 Launch the pipeline execution with the following command: 
 

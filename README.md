@@ -36,7 +36,7 @@ The ONT-TB-NF pipeline includes steps of basecalling, quality control, target re
   + [Amplicon sequencing](#for-amplicon-sequencing)
   + [Basecalling with Guppy](#using-guppy-for-basecalling)
 * [Pipeline Summary](#pipeline-summary)
-* [Pipeline Ouputs](#pipeline-results)
+* [Pipeline Outputs](#pipeline-results)
 * [Requirements](#requirements)
 * [TB Data and Analysis Results](http://www.bio8.cs.hku.hk/ont_tb/)
 
